@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>NMC CompetencyAI — Microbiology SDL Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+/* ═══════════════ RESET & TOKENS ═══════════════ */
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --teal:#0D9488;--teal-d:#0F766E;--teal-l:#F0FDFA;--teal-b:#99F6E4;
+  --amber:#D97706;--amber-l:#FFFBEB;--amber-b:#FDE68A;
+  --violet:#7C3AED;--violet-l:#F5F3FF;--violet-b:#DDD6FE;
+  --red:#DC2626;--red-l:#FFF1F2;--red-b:#FECACA;
+  --green:#059669;--green-l:#ECFDF5;--green-b:#A7F3D0;
+  --blue:#1D4ED8;--blue-l:#EFF6FF;--blue-b:#BFDBFE;
+  --slate:#0F172A;--slate2:#1E293B;--slate3:#334155;--slate4:#64748B;--slate5:#94A3B8;
+  --border:#E2E8F0;--border2:#F1F5F9;--surface:#F8FAFC;
+  --shadow:0 1px 3px rgba(0,0,0,.08);--shadow2:0 4px 20px rgba(0,0,0,.1);
+  --r:12px;--r-sm:8px;
+}
+html,body{height:100%;font-family:'Sora',sans-serif;background:#fff;color:var(--slate);font-size:14px;line-height:1.55;}
+button{font-family:inherit;cursor:pointer;}
+input,select,textarea{font-family:inherit;}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+
+/* ═══════════════ ANIMATIONS ═══════════════ */
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideRight{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:translateX(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes loginReveal{from{opacity:0;transform:scale(.97) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.fade-up{animation:fadeUp .35s ease both;}
+.fade-in{animation:fadeIn .25s ease both;}
+.shimmer-box{background:linear-gradient(90deg,#F1F5F9 25%,#E8EEF5 50%,#F1F5F9 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:8px;}
+.spin{animation:spin .8s linear infinite;}
+
+/* ═══════════════ PROGRESS BAR ═══════════════ */
+.pbar{height:5px;background:var(--border2);border-radius:3px;overflow:hidden;}
+.pbar-fill{height:100%;border-radius:3px;transition:width .6s ease;}
+
+/* ═══════════════ BADGE ═══════════════ */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:600;}
+.badge-code{font-family:'DM Mono',monospace;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;}
+
+/* ═══════════════ BUTTONS ═══════════════ */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 20px;border-radius:var(--r-sm);border:none;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .18s;}
+.btn:hover{opacity:.88;transform:translateY(-1px);}
+.btn:disabled{opacity:.42;cursor:default;transform:none;}
+.btn-teal{background:linear-gradient(135deg,var(--teal),#0891B2);color:#fff;}
+.btn-amber{background:linear-gradient(135deg,var(--amber),#B45309);color:#fff;}
+.btn-violet{background:linear-gradient(135deg,var(--violet),#6D28D9);color:#fff;}
+.btn-outline{background:#fff;border:1px solid var(--border);color:var(--slate3);}
+.btn-outline:hover{border-color:var(--teal);color:var(--teal);}
+.btn-sm{padding:6px 14px;font-size:12px;}
+.btn-danger{background:linear-gradient(135deg,var(--red),#B91C1C);color:#fff;}
+
+/* ═══════════════ INPUTS ═══════════════ */
+.inp{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:#fff;color:var(--slate);font-size:13px;outline:none;transition:border-color .15s,box-shadow .15s;}
+.inp:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(13,148,136,.1);}
+.inp::placeholder{color:var(--slate5);}
+textarea.inp{resize:vertical;line-height:1.7;}
+.inp-label{font-size:12px;font-weight:600;color:var(--slate3);margin-bottom:5px;display:block;}
+.inp-group{margin-bottom:14px;}
+
+/* ═══════════════ CARDS ═══════════════ */
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:18px;box-shadow:var(--shadow);}
+.card-hd{font-size:10px;font-family:'DM Mono',monospace;font-weight:600;color:var(--slate5);letter-spacing:.3px;margin-bottom:14px;}
+
+/* ═══════════════ MODAL ═══════════════ */
+.modal-ov{display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:300;align-items:center;justify-content:center;}
+.modal-ov.open{display:flex;}
+.modal-box{background:#fff;border-radius:16px;padding:28px;width:540px;max-height:88vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.18);animation:fadeUp .3s ease;}
+
+/* ═══════════════ TOAST ═══════════════ */
+#toast{position:fixed;bottom:24px;right:24px;z-index:400;display:flex;flex-direction:column;gap:8px;}
+.toast-item{padding:12px 18px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:var(--shadow2);animation:slideRight .3s ease;display:flex;align-items:center;gap:8px;}
+.toast-success{background:#ECFDF5;border:1px solid #6EE7B7;color:#065F46;}
+.toast-error{background:var(--red-l);border:1px solid var(--red-b);color:#991B1B;}
+.toast-info{background:var(--blue-l);border:1px solid var(--blue-b);color:#1E40AF;}
+
+/* ═══════════════════════════════════════
+   LOGIN PAGE
+═══════════════════════════════════════ */
+#login-screen{
+  display:flex;height:100vh;background:#fff;
+}
+#login-left{
+  flex:0 0 52%;display:flex;flex-direction:column;justify-content:center;
+  padding:60px 64px;background:linear-gradient(155deg,#0F172A 0%,#0D4D46 60%,#134E4A 100%);
+  position:relative;overflow:hidden;
+}
+#login-left::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 70% 60% at 30% 40%, rgba(13,148,136,.25) 0%, transparent 70%),
+             radial-gradient(ellipse 50% 50% at 80% 80%, rgba(6,95,70,.3) 0%, transparent 60%);
+}
+.ll-grid{
+  position:absolute;inset:0;
+  background-image:linear-gradient(rgba(13,148,136,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(13,148,136,.06) 1px,transparent 1px);
+  background-size:40px 40px;
+}
+.ll-content{position:relative;z-index:1;}
+.ll-logo{display:flex;align-items:center;gap:14px;margin-bottom:52px;}
+.ll-logo-icon{width:50px;height:50px;border-radius:14px;background:linear-gradient(135deg,var(--teal),#0891B2);display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 8px 24px rgba(13,148,136,.4);}
+.ll-logo-text{font-size:20px;font-weight:800;color:#fff;letter-spacing:-.3px;}
+.ll-logo-sub{font-size:10px;color:rgba(255,255,255,.5);font-family:'DM Mono',monospace;font-weight:500;letter-spacing:.5px;}
+.ll-headline{font-size:38px;font-weight:800;color:#fff;line-height:1.2;margin-bottom:18px;letter-spacing:-.5px;}
+.ll-headline span{color:var(--teal-b);}
+.ll-sub{font-size:15px;color:rgba(255,255,255,.6);line-height:1.7;margin-bottom:40px;max-width:380px;}
+.ll-pills{display:flex;flex-wrap:wrap;gap:8px;}
+.ll-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:20px;font-size:12px;color:rgba(255,255,255,.7);font-family:'DM Mono',monospace;}
+.ll-dots{position:absolute;bottom:40px;left:64px;display:flex;gap:8px;z-index:1;}
+.ll-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.2);}
+.ll-dot.active{background:var(--teal);width:20px;border-radius:3px;}
+#login-right{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:40px 50px;overflow-y:auto;
+}
+.lr-card{width:100%;max-width:440px;animation:loginReveal .5s ease both;}
+.lr-title{font-size:26px;font-weight:800;color:var(--slate);margin-bottom:4px;letter-spacing:-.4px;}
+.lr-sub{font-size:14px;color:var(--slate4);margin-bottom:28px;}
+.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.login-submit{width:100%;padding:13px;background:linear-gradient(135deg,var(--teal),#0891B2);color:#fff;border:none;border-radius:var(--r-sm);font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:6px;}
+.login-submit:hover{opacity:.9;transform:translateY(-1px);box-shadow:0 8px 24px rgba(13,148,136,.3);}
+.login-submit:disabled{opacity:.5;transform:none;cursor:default;}
+.divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--slate5);font-size:12px;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.gender-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.gender-opt{position:relative;}
+.gender-opt input{position:absolute;opacity:0;width:0;height:0;}
+.gender-opt label{display:flex;align-items:center;justify-content:center;gap:5px;padding:8px;border:1.5px solid var(--border);border-radius:var(--r-sm);font-size:12px;font-weight:600;color:var(--slate4);cursor:pointer;transition:all .15s;}
+.gender-opt input:checked + label{border-color:var(--teal);background:var(--teal-l);color:var(--teal);}
+.nmc-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;background:var(--teal-l);border:1px solid var(--teal-b);border-radius:20px;font-size:11px;color:var(--teal);font-weight:600;font-family:'DM Mono',monospace;margin-bottom:22px;}
+
+/* ═══════════════════════════════════════
+   APP SHELL (post-login)
+═══════════════════════════════════════ */
+#app-shell{display:none;flex-direction:column;height:100vh;overflow:hidden;}
+#app-shell.visible{display:flex;}
+
+/* ── Top nav ── */
+#topnav{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 24px;background:#fff;
+  border-bottom:1px solid var(--border);
+  box-shadow:var(--shadow);flex-shrink:0;z-index:50;
+}
+.nav-logo-icon{width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,var(--teal),#0891B2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.nav-logo-text{font-size:15px;font-weight:800;color:var(--slate);letter-spacing:-.3px;}
+.nav-logo-sub{font-size:9px;color:var(--slate5);font-family:'DM Mono',monospace;font-weight:500;letter-spacing:.3px;}
+.nav-tabs{display:flex;gap:3px;margin-left:20px;}
+.nav-tab{padding:7px 15px;border-radius:var(--r-sm);border:1px solid var(--border);background:#fff;color:var(--slate4);font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;transition:all .18s;}
+.nav-tab:hover{border-color:var(--teal);color:var(--teal);background:var(--teal-l);}
+.nav-tab.active{border-color:var(--teal);color:var(--teal);background:var(--teal-l);}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
+.nav-student-pill{display:flex;align-items:center;gap:8px;padding:5px 12px;background:var(--surface);border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--slate3);}
+.nav-student-pill strong{color:var(--teal);font-weight:700;}
+.nav-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--teal),#0891B2);display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;font-weight:700;flex-shrink:0;}
+.nav-sync-badge{font-size:10px;font-family:'DM Mono',monospace;color:var(--teal);background:var(--teal-l);border:1px solid var(--teal-b);padding:4px 10px;border-radius:20px;font-weight:600;}
+.logout-btn{padding:6px 12px;border:1px solid var(--red-b);border-radius:var(--r-sm);background:var(--red-l);color:var(--red);font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .15s;}
+.logout-btn:hover{background:var(--red);color:#fff;}
+
+/* ── Main ── */
+#main{flex:1;overflow:hidden;background:#fff;}
+.page{display:none;}
+.page-scroll{display:none;overflow-y:auto;height:100%;padding:26px 30px;}
+.page-scroll.visible,.page.visible{display:block;}
+
+/* ═══════════════════════════════════════
+   STUDENT SDL PAGE (flex layout)
+═══════════════════════════════════════ */
+#student-page{display:none;height:calc(100vh - 57px);flex-direction:row;}
+#student-page.visible{display:flex;}
+#student-sidebar{width:194px;flex-shrink:0;border-right:1px solid var(--border);padding:14px 10px;display:flex;flex-direction:column;gap:3px;background:var(--surface);overflow-y:auto;}
+.std-tab{width:100%;padding:9px 11px;text-align:left;border-radius:var(--r-sm);border:1px solid transparent;background:transparent;color:var(--slate4);font-size:12px;font-weight:600;display:flex;align-items:center;gap:7px;transition:all .18s;font-family:inherit;}
+.std-tab:hover{border-color:var(--border);background:#fff;color:var(--teal);}
+.std-tab.active{border-color:var(--teal);background:var(--teal-l);color:var(--teal);}
+.ctx-box{margin-top:auto;padding:11px;background:#fff;border-radius:10px;border:1px solid var(--border);box-shadow:var(--shadow);}
+.ctx-hd{font-size:9px;color:var(--slate5);font-family:'DM Mono',monospace;font-weight:600;margin-bottom:9px;letter-spacing:.3px;}
+.ctx-lbl{font-size:10px;color:var(--slate3);font-weight:600;margin-bottom:3px;}
+.ctx-sel{width:100%;padding:5px 7px;font-size:11px;border:1px solid var(--border);border-radius:6px;background:#fff;color:var(--slate);outline:none;font-family:inherit;}
+#student-content{flex:1;overflow-y:auto;padding:22px 26px;background:#fff;}
+.std-panel{display:none;}
+.std-panel.active{display:block;animation:fadeUp .3s ease;}
+
+/* ── Chat ── */
+.chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 230px);}
+.chat-msgs{flex:1;overflow-y:auto;background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:14px;margin-bottom:9px;}
+.chat-msg{display:flex;margin-bottom:10px;}
+.chat-msg.user{justify-content:flex-end;}
+.chat-bubble{max-width:78%;padding:10px 13px;border-radius:12px;font-size:13px;line-height:1.7;white-space:pre-wrap;}
+.chat-bubble.bot{background:#fff;border:1px solid var(--border);border-radius:12px 12px 12px 4px;color:var(--slate2);box-shadow:var(--shadow);}
+.chat-bubble.user-msg{background:linear-gradient(135deg,#EFF6FF,#DBEAFE);border:1px solid #BFDBFE;border-radius:12px 12px 4px 12px;color:var(--blue);}
+.bot-av{width:28px;height:28px;border-radius:8px;flex-shrink:0;margin-right:7px;background:linear-gradient(135deg,var(--teal),#0891B2);display:flex;align-items:center;justify-content:center;font-size:13px;}
+.chat-suggs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;}
+.chat-sugg{padding:4px 10px;background:#fff;border:1px solid var(--border);border-radius:20px;color:var(--slate4);font-size:11px;cursor:pointer;transition:all .15s;font-family:inherit;}
+.chat-sugg:hover{border-color:var(--teal);color:var(--teal);}
+.chat-input-row{display:flex;gap:8px;}
+
+/* ── Quiz ── */
+.quiz-q{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:10px;box-shadow:var(--shadow);}
+.quiz-opts{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:9px;}
+.quiz-opt{padding:9px 11px;background:var(--surface);border:1px solid var(--border);border-radius:7px;cursor:pointer;font-size:12px;color:var(--slate2);display:flex;gap:6px;transition:all .15s;font-family:inherit;text-align:left;}
+.quiz-opt:hover{border-color:var(--teal);background:var(--teal-l);}
+.quiz-opt.selected{background:#EFF6FF;border-color:#3B82F6;color:var(--blue);}
+.quiz-opt.correct{background:var(--teal-l);border-color:var(--teal);color:var(--teal);}
+.quiz-opt.wrong{background:var(--red-l);border-color:var(--red);color:var(--red);}
+.quiz-key{font-family:'DM Mono',monospace;font-weight:700;flex-shrink:0;}
+
+/* ── Roadmap ── */
+.roadmap-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px;}
+.week-card{border-radius:var(--r);padding:15px;border:1px solid;border-top-width:3px;box-shadow:var(--shadow);}
+
+/* ── Analysis ── */
+.analysis-domain-bar{margin-bottom:10px;}
+.meta-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:13px;}
+.meta-card{border-radius:10px;padding:12px;text-align:center;}
+.meta-card-lbl{font-size:10px;color:var(--slate5);font-family:'DM Mono',monospace;font-weight:600;margin-bottom:4px;}
+.meta-card-val{font-size:14px;font-weight:700;}
+.gap-str-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:13px;}
+.sample-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:12px;}
+.sample-item{padding:9px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);font-size:11px;color:var(--slate4);cursor:pointer;line-height:1.5;transition:all .15s;}
+.sample-item:hover{border-color:var(--teal);background:var(--teal-l);}
+
+/* ═══════════════════════════════════════
+   DASHBOARD PAGE
+═══════════════════════════════════════ */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-bottom:18px;}
+.kpi-card{border-radius:var(--r);padding:16px;border:1px solid;border-top-width:3px;box-shadow:var(--shadow);}
+.kpi-inner{display:flex;justify-content:space-between;align-items:flex-start;}
+.kpi-lbl{font-size:10px;font-family:'DM Mono',monospace;font-weight:600;margin-bottom:5px;color:var(--slate5);}
+.kpi-val{font-size:26px;font-weight:800;}
+.kpi-sub{font-size:11px;color:var(--slate5);margin-top:2px;}
+.chart-grid-2{display:grid;grid-template-columns:1.4fr 1fr;gap:13px;margin-bottom:13px;}
+.chart-grid-eq{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:13px;}
+.activity-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.activity-item{display:flex;gap:9px;padding:10px 12px;background:var(--surface);border-radius:var(--r-sm);border:1px solid var(--border);align-items:flex-start;}
+.activity-txt{font-size:12px;color:var(--slate2);line-height:1.5;}
+.activity-time{font-size:10px;color:var(--slate5);margin-top:2px;font-family:'DM Mono',monospace;}
+
+/* ═══════════════════════════════════════
+   ADMIN PAGE
+═══════════════════════════════════════ */
+.sub-nav{display:flex;gap:7px;margin-bottom:22px;border-bottom:1px solid var(--border);padding-bottom:14px;}
+.sub-tab{padding:7px 15px;border-radius:var(--r-sm);border:1px solid var(--border);background:#fff;color:var(--slate4);font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;transition:all .18s;font-family:inherit;}
+.sub-tab:hover{border-color:var(--teal);color:var(--teal);background:var(--teal-l);}
+.sub-tab.active{border-color:var(--teal);color:var(--teal);background:var(--teal-l);}
+.tbl-wrap{background:#fff;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);}
+.tbl-hd{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 80px;padding:9px 15px;background:var(--surface);border-bottom:1px solid var(--border);font-size:10px;color:var(--slate5);font-family:'DM Mono',monospace;font-weight:600;}
+.tbl-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 80px;padding:11px 15px;border-bottom:1px solid var(--border2);align-items:center;cursor:pointer;transition:background .14s;}
+.tbl-row:hover{background:var(--surface);}
+.tbl-row:last-child{border-bottom:none;}
+.tbl-row-alt{background:#FAFAFA;}
+.at-risk-card{background:#fff;border:1px solid var(--red-b);border-left:4px solid var(--red);border-radius:var(--r);padding:16px;box-shadow:var(--shadow);}
+.at-risk-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px;}
+.settings-group{margin-bottom:18px;}
+.settings-group-lbl{font-size:10px;color:var(--slate5);font-family:'DM Mono',monospace;font-weight:600;margin-bottom:9px;letter-spacing:.3px;}
+.settings-list{background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:var(--shadow);}
+.settings-row{display:flex;justify-content:space-between;padding:12px 15px;border-bottom:1px solid var(--border2);align-items:center;}
+.settings-row:last-child{border-bottom:none;}
+.settings-key{font-size:13px;color:var(--slate2);}
+.settings-val{font-size:12px;color:var(--teal);font-family:'DM Mono',monospace;font-weight:600;}
+.emotion-card{padding:9px 13px;border-radius:10px;border:1px solid;text-align:center;}
+.top-perf-row{display:flex;align-items:center;gap:9px;margin-bottom:10px;}
+.rank-badge{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;}
+.live-badge{font-size:11px;color:var(--teal);font-family:'DM Mono',monospace;background:var(--teal-l);border:1px solid var(--teal-b);padding:6px 13px;border-radius:var(--r-sm);font-weight:600;}
+
+/* ═══════════════════════════════════════
+   GOOGLE DRIVE CONFIG PANEL
+═══════════════════════════════════════ */
+.gdrive-banner{display:flex;align-items:center;gap:14px;padding:14px 18px;background:linear-gradient(135deg,#FFF8F0,#FFF3CD);border:1px solid #FDE68A;border-radius:var(--r);margin-bottom:20px;}
+.gdrive-icon{font-size:28px;flex-shrink:0;}
+.gdrive-actions{display:flex;gap:7px;margin-left:auto;flex-shrink:0;}
+.config-step{display:flex;gap:12px;padding:13px;background:var(--surface);border-radius:var(--r-sm);border:1px solid var(--border);margin-bottom:8px;align-items:flex-start;}
+.step-num{width:26px;height:26px;border-radius:50%;background:var(--teal);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.step-content{flex:1;}
+.step-title{font-size:13px;font-weight:700;color:var(--slate);margin-bottom:3px;}
+.step-desc{font-size:12px;color:var(--slate4);line-height:1.6;}
+.step-code{font-family:'DM Mono',monospace;font-size:11px;background:#1E293B;color:#7DD3FC;padding:8px 12px;border-radius:6px;margin-top:6px;overflow-x:auto;white-space:pre;}
+
+/* ═══════════════ ROLE SELECTOR ═══════════════ */
+.role-selector{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:24px;}
+.role-card{border:2px solid var(--border);border-radius:12px;padding:16px 10px;text-align:center;cursor:pointer;transition:all .2s;background:#fff;position:relative;overflow:hidden;}
+.role-card::before{content:'';position:absolute;inset:0;background:var(--teal-l);opacity:0;transition:opacity .2s;}
+.role-card:hover{border-color:var(--teal);transform:translateY(-2px);box-shadow:0 6px 20px rgba(13,148,136,.12);}
+.role-card:hover::before{opacity:1;}
+.role-card.selected{border-color:var(--teal);background:var(--teal-l);box-shadow:0 0 0 3px rgba(13,148,136,.15);}
+.role-card .role-icon{font-size:26px;margin-bottom:7px;position:relative;}
+.role-card .role-name{font-size:13px;font-weight:700;color:var(--slate);position:relative;}
+.role-card .role-desc{font-size:10px;color:var(--slate5);margin-top:2px;position:relative;}
+.role-card.selected .role-name{color:var(--teal);}
+.role-check{position:absolute;top:7px;right:7px;width:18px;height:18px;border-radius:50%;background:var(--teal);display:none;align-items:center;justify-content:center;font-size:10px;color:#fff;font-weight:700;}
+.role-card.selected .role-check{display:flex;}
+/* Role-coloured login panels */
+.role-faculty #login-left{background:linear-gradient(155deg,#1E1B4B 0%,#3730A3 60%,#4338CA 100%);}
+.role-faculty #login-left::before{background:radial-gradient(ellipse 70% 60% at 30% 40%, rgba(99,102,241,.25) 0%, transparent 70%);}
+.role-faculty .ll-headline span{color:#C7D2FE;}
+.role-faculty .ll-logo-icon,.role-faculty .login-submit{background:linear-gradient(135deg,#6366F1,#4338CA);}
+.role-faculty .inp:focus{border-color:#6366F1;box-shadow:0 0 0 3px rgba(99,102,241,.1);}
+.role-faculty .nmc-badge{background:var(--violet-l);border-color:var(--violet-b);color:var(--violet);}
+.role-admin #login-left{background:linear-gradient(155deg,#1C1917 0%,#7C2D12 60%,#9A3412 100%);}
+.role-admin #login-left::before{background:radial-gradient(ellipse 70% 60% at 30% 40%, rgba(234,88,12,.2) 0%, transparent 70%);}
+.role-admin .ll-headline span{color:#FED7AA;}
+.role-admin .ll-logo-icon,.role-admin .login-submit{background:linear-gradient(135deg,#EA580C,#C2410C);}
+.role-admin .inp:focus{border-color:#EA580C;box-shadow:0 0 0 3px rgba(234,88,12,.1);}
+.role-admin .nmc-badge{background:#FFF7ED;border-color:#FED7AA;color:#C2410C;}
+/* Nav role badges */
+.nav-role-badge{padding:3px 9px;border-radius:5px;font-size:10px;font-weight:700;font-family:'DM Mono',monospace;letter-spacing:.3px;}
+.nav-role-student{background:var(--teal-l);color:var(--teal);border:1px solid var(--teal-b);}
+.nav-role-faculty{background:var(--violet-l);color:var(--violet);border:1px solid var(--violet-b);}
+.nav-role-admin{background:#FFF7ED;color:#C2410C;border:1px solid #FED7AA;}
+
+/* ═══════════════ MISC ═══════════════ */
+.page-title{font-size:22px;font-weight:800;color:var(--slate);margin-bottom:3px;letter-spacing:-.3px;}
+.page-sub{font-size:13px;color:var(--slate5);margin-bottom:20px;}
+.section-title{font-size:13px;font-weight:700;color:var(--slate);margin-bottom:10px;}
+.empty-state{text-align:center;padding:52px 20px;color:var(--slate5);}
+.empty-state .icon{font-size:42px;margin-bottom:12px;}
+.empty-state p{font-size:14px;color:var(--slate4);margin-bottom:16px;}
+.loader-dots{display:inline-flex;gap:5px;}
+.loader-dot{width:6px;height:6px;border-radius:50%;background:var(--teal);animation:pulse 1.4s ease infinite;}
+.loader-dot:nth-child(2){animation-delay:.2s;}
+.loader-dot:nth-child(3){animation-delay:.4s;}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     LOGIN SCREEN
+═══════════════════════════════════════════════════ -->
+<div id="login-screen">
+  <!-- Left panel -->
+  <div id="login-left">
+    <div class="ll-grid"></div>
+    <div class="ll-content">
+      <div class="ll-logo">
+        <div class="ll-logo-icon">⚕</div>
+        <div>
+          <div class="ll-logo-text">NMC CompetencyAI</div>
+          <div class="ll-logo-sub">MICROBIOLOGY · SDL PLATFORM</div>
+        </div>
+      </div>
+      <h1 class="ll-headline">Master <span>Microbiology</span><br/>the NMC Way</h1>
+      <p class="ll-sub">AI-powered self-directed learning aligned to the NMC Competency-Based Education framework. Adaptive quizzes, reflection analysis, and personalised roadmaps mapped to MI competency codes.</p>
+      <div class="ll-pills">
+        <span class="ll-pill">📚 MI1–MI8 Coverage</span>
+        <span class="ll-pill">🔬 DOAP-aligned</span>
+        <span class="ll-pill">🧠 Miller's Pyramid</span>
+        <span class="ll-pill">☁️ Google Drive Sync</span>
+      </div>
+    </div>
+    <div class="ll-dots">
+      <div class="ll-dot active"></div>
+      <div class="ll-dot"></div>
+      <div class="ll-dot"></div>
+    </div>
+  </div>
+
+  <!-- Right panel — role selector + forms -->
+  <div id="login-right">
+    <div class="lr-card">
+      <div class="nmc-badge" id="login-badge">⚕ NMC CBE 2018 · MBBS Microbiology</div>
+      <div class="lr-title" id="login-title">Welcome</div>
+      <div class="lr-sub" id="login-subtitle">Select your role to continue</div>
+
+      <!-- ROLE SELECTOR -->
+      <div class="role-selector" id="role-selector">
+        <div class="role-card" id="role-card-student" onclick="selectRole('student')">
+          <div class="role-check">✓</div>
+          <div class="role-icon">🎓</div>
+          <div class="role-name">Student</div>
+          <div class="role-desc">SDL & Quizzes</div>
+        </div>
+        <div class="role-card" id="role-card-faculty" onclick="selectRole('faculty')">
+          <div class="role-check">✓</div>
+          <div class="role-icon">👨‍🏫</div>
+          <div class="role-name">Faculty</div>
+          <div class="role-desc">View & Guide</div>
+        </div>
+        <div class="role-card" id="role-card-admin" onclick="selectRole('admin')">
+          <div class="role-check">✓</div>
+          <div class="role-icon">🛡️</div>
+          <div class="role-name">Admin</div>
+          <div class="role-desc">Full Access</div>
+        </div>
+      </div>
+
+      <!-- ─── STUDENT FORM ─── -->
+      <div id="form-student" style="display:none;">
+        <div class="form-row-2">
+          <div class="inp-group">
+            <label class="inp-label">Student ID *</label>
+            <input id="f-sid" class="inp" type="text" placeholder="e.g. STU2024001" autocomplete="off"/>
+          </div>
+          <div class="inp-group">
+            <label class="inp-label">Roll Number *</label>
+            <input id="f-roll" class="inp" type="text" placeholder="e.g. 2024MBBS042"/>
+          </div>
+        </div>
+        <div class="inp-group">
+          <label class="inp-label">Full Name *</label>
+          <input id="f-name" class="inp" type="text" placeholder="As per college records"/>
+        </div>
+        <div class="form-row-2">
+          <div class="inp-group">
+            <label class="inp-label">Batch / Year *</label>
+            <select id="f-batch" class="inp">
+              <option value="">Select batch</option>
+              <option>MBBS 2020</option><option>MBBS 2021</option><option>MBBS 2022</option>
+              <option>MBBS 2023</option><option>MBBS 2024</option><option>MBBS 2025</option>
+            </select>
+          </div>
+          <div class="inp-group">
+            <label class="inp-label">Miller's Level *</label>
+            <select id="f-level" class="inp">
+              <option value="">Select level</option>
+              <option>Knows</option><option>Knows How</option>
+              <option>Shows How</option><option>Performs</option>
+            </select>
+          </div>
+        </div>
+        <div class="inp-group">
+          <label class="inp-label">Email Address *</label>
+          <input id="f-email" class="inp" type="email" placeholder="college@example.edu"/>
+        </div>
+        <div class="inp-group">
+          <label class="inp-label">Gender *</label>
+          <div class="gender-row">
+            <div class="gender-opt"><input type="radio" name="gender" id="g-male" value="Male"/><label for="g-male">♂ Male</label></div>
+            <div class="gender-opt"><input type="radio" name="gender" id="g-female" value="Female"/><label for="g-female">♀ Female</label></div>
+            <div class="gender-opt"><input type="radio" name="gender" id="g-other" value="Other"/><label for="g-other">◇ Other</label></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── FACULTY FORM ─── -->
+      <div id="form-faculty" style="display:none;">
+        <div class="inp-group">
+          <label class="inp-label">Faculty ID *</label>
+          <input id="f-fid" class="inp" type="text" placeholder="e.g. FAC001" autocomplete="off"/>
+        </div>
+        <div class="inp-group">
+          <label class="inp-label">Full Name *</label>
+          <input id="f-fname" class="inp" type="text" placeholder="Dr. / Prof. Name"/>
+        </div>
+        <div class="inp-group">
+          <label class="inp-label">Department *</label>
+          <select id="f-fdept" class="inp">
+            <option value="">Select department</option>
+            <option>Microbiology</option><option>Pathology</option><option>Medicine</option>
+            <option>Paediatrics</option><option>Community Medicine</option><option>Other</option>
+          </select>
+        </div>
+        <div class="inp-group">
+          <label class="inp-label">Email Address *</label>
+          <input id="f-femail" class="inp" type="email" placeholder="faculty@college.edu"/>
+        </div>
+        <div class="inp-group">
+          <label class="inp-label">Password *</label>
+          <input id="f-fpass" class="inp" type="password" placeholder="Enter faculty password"/>
+        </div>
+        <div style="padding:9px 12px;background:var(--violet-l);border:1px solid var(--violet-b);border-radius:var(--r-sm);font-size:11px;color:var(--violet);margin-bottom:12px;">
+          🔒 Faculty access: Dashboard & class analytics. Contact admin to reset password.
+        </div>
+      </div>
+
+      <!-- ─── ADMIN FORM ─── -->
+      <div id="form-admin" style="display:none;">
+        <div class="inp-group">
+          <label class="inp-label">Admin Username *</label>
+          <input id="f-auser" class="inp" type="text" placeholder="admin username" autocomplete="off"/>
+        </div>
+        <div class="inp-group">
+          <label class="inp-label">Admin Password *</label>
+          <input id="f-apass" class="inp" type="password" placeholder="Enter admin password"/>
+        </div>
+        <div style="padding:9px 12px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:var(--r-sm);font-size:11px;color:#C2410C;margin-bottom:12px;">
+          🛡️ Admin access: Full platform control — student records, analytics, Google Drive setup & settings.
+        </div>
+      </div>
+
+      <div id="login-err" style="display:none;padding:10px 13px;background:var(--red-l);border:1px solid var(--red-b);border-radius:var(--r-sm);font-size:13px;color:var(--red);margin-bottom:12px;"></div>
+
+      <button class="login-submit" id="login-btn" onclick="handleLogin()" style="display:none;">
+        <span id="login-btn-txt">Continue →</span>
+      </button>
+
+      <button class="login-submit" id="back-btn" onclick="resetRoleSelector()" style="display:none;background:linear-gradient(135deg,var(--slate4),var(--slate3));margin-top:8px;">
+        ← Choose Different Role
+      </button>
+
+      <div id="login-footer" style="margin-top:18px;">
+        <div class="divider">NMC Microbiology Competencies</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;justify-content:center;">
+          <span class="badge-code" style="color:var(--teal);background:var(--teal-l);border:1px solid var(--teal-b);">MI1 General</span>
+          <span class="badge-code" style="color:var(--amber);background:var(--amber-l);border:1px solid var(--amber-b);">MI3 GI</span>
+          <span class="badge-code" style="color:var(--violet);background:var(--violet-l);border:1px solid var(--violet-b);">MI5 CNS</span>
+          <span class="badge-code" style="color:var(--blue);background:var(--blue-l);border:1px solid var(--blue-b);">MI6 Resp</span>
+          <span class="badge-code" style="color:var(--red);background:var(--red-l);border:1px solid var(--red-b);">MI8 Misc</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     APP SHELL
+═══════════════════════════════════════════════════ -->
+<div id="app-shell">
+  <!-- Top nav -->
+  <nav id="topnav">
+    <div class="nav-logo-icon">⚕</div>
+    <div>
+      <div class="nav-logo-text">NMC CompetencyAI</div>
+      <div class="nav-logo-sub">MICROBIOLOGY · NMC CBE 2018</div>
+    </div>
+    <div class="nav-tabs" id="nav-tabs">
+      <!-- tabs injected by JS based on role -->
+    </div>
+    <div class="nav-right">
+      <div class="nav-sync-badge" id="sync-status">● Not synced</div>
+      <span id="nav-role-badge" class="nav-role-badge nav-role-student" style="display:none;"></span>
+      <div class="nav-student-pill">
+        <span id="nav-student-name">User</span> &nbsp;·&nbsp; <strong id="nav-student-roll"></strong>
+      </div>
+      <div class="nav-avatar" id="nav-avatar">U</div>
+      <button class="logout-btn" onclick="handleLogout()">Logout</button>
+    </div>
+  </nav>
+
+  <!-- Main content -->
+  <div id="main">
+
+    <!-- ══════════ STUDENT SDL PAGE ══════════ -->
+    <div id="student-page">
+      <!-- Sidebar -->
+      <div id="student-sidebar">
+        <button class="std-tab active" onclick="showStdPanel('reflect',this)">🔍 Reflect &amp; Analyse</button>
+        <button class="std-tab" onclick="showStdPanel('roadmap',this)">🗺️ Study Roadmap</button>
+        <button class="std-tab" onclick="showStdPanel('quiz',this)">❓ Adaptive Quiz</button>
+        <button class="std-tab" onclick="showStdPanel('tutor',this)">🤖 AI Tutor</button>
+        <div class="ctx-box">
+          <div class="ctx-hd">SESSION CONTEXT</div>
+          <div style="margin-bottom:8px;">
+            <div class="ctx-lbl">Subject</div>
+            <select class="ctx-sel" disabled style="background:var(--teal-l);color:var(--teal);font-weight:700;">
+              <option>Microbiology</option>
+            </select>
+          </div>
+          <div>
+            <div class="ctx-lbl">Miller's Level</div>
+            <select id="level-select" class="ctx-sel">
+              <option>Knows</option><option selected>Knows How</option>
+              <option>Shows How</option><option>Performs</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content area -->
+      <div id="student-content">
+
+        <!-- REFLECT PANEL -->
+        <div id="reflect-panel" class="std-panel active">
+          <div class="page-title">Learning Reflection</div>
+          <p class="page-sub">Write your reflection to receive NMC MI competency-mapped analysis</p>
+          <div class="sample-grid">
+            <div class="sample-item" onclick="setSample(0)"><span style="color:var(--teal);margin-right:4px;">✦</span>Gram staining results were inconsistent in the lab today...</div>
+            <div class="sample-item" onclick="setSample(1)"><span style="color:var(--teal);margin-right:4px;">✦</span>Confused about selective vs differential media choices...</div>
+            <div class="sample-item" onclick="setSample(2)"><span style="color:var(--teal);margin-right:4px;">✦</span>I know antibiotic mechanisms but hesitate in clinical cases...</div>
+          </div>
+          <textarea id="reflection-input" class="inp" rows="6" style="width:100%;margin-bottom:11px;" placeholder="Describe what you learned, what confused you, how you felt, and what you want to improve..."></textarea>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-teal" id="analyze-btn" onclick="analyzeReflection()">🔍 Analyse Reflection</button>
+            <button class="btn btn-amber btn-sm" onclick="generateQuiz()">❓ Take Adaptive Quiz</button>
+          </div>
+          <div id="analysis-loading" style="display:none;margin-top:16px;">
+            <div class="shimmer-box" style="height:50px;margin-bottom:7px;"></div>
+            <div class="shimmer-box" style="height:50px;margin-bottom:7px;"></div>
+            <div class="shimmer-box" style="height:50px;"></div>
+          </div>
+          <div id="analysis-result" style="display:none;margin-top:18px;animation:fadeUp .35s ease;"></div>
+        </div>
+
+        <!-- ROADMAP PANEL -->
+        <div id="roadmap-panel" class="std-panel">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
+            <div class="page-title">Personalised Study Roadmap</div>
+            <button class="btn btn-violet btn-sm" onclick="generateRoadmap()">🔄 Regenerate</button>
+          </div>
+          <p class="page-sub">4-week NMC CBE-aligned adaptive learning journey for Microbiology</p>
+          <div id="roadmap-empty" class="empty-state">
+            <div class="icon">🗺️</div>
+            <p>Complete the Adaptive Quiz or write a Reflection to auto-generate your roadmap</p>
+            <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+              <button class="btn btn-violet" onclick="generateRoadmap()">Generate Roadmap Now</button>
+              <button class="btn btn-outline" onclick="showStdPanel('quiz',null)">Take Quiz First</button>
+            </div>
+          </div>
+          <div id="roadmap-loading" style="display:none;">
+            <div class="shimmer-box" style="height:54px;margin-bottom:9px;"></div>
+            <div class="shimmer-box" style="height:140px;margin-bottom:9px;"></div>
+            <div class="shimmer-box" style="height:140px;"></div>
+          </div>
+          <div id="roadmap-content" style="display:none;"></div>
+        </div>
+
+        <!-- QUIZ PANEL -->
+        <div id="quiz-panel" class="std-panel">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
+            <div class="page-title">Adaptive Quiz</div>
+            <button class="btn btn-amber btn-sm" onclick="generateQuiz()">New Quiz</button>
+          </div>
+          <p class="page-sub" id="quiz-subtitle">NMC Microbiology · Miller's Level: Knows How</p>
+          <div id="quiz-empty" class="empty-state">
+            <div class="icon">❓</div>
+            <p>Ready to test your NMC Microbiology competencies?</p>
+            <button class="btn btn-amber" onclick="generateQuiz()">Start Quiz →</button>
+          </div>
+          <div id="quiz-loading" style="display:none;">
+            <div class="shimmer-box" style="height:100px;margin-bottom:8px;"></div>
+            <div class="shimmer-box" style="height:100px;margin-bottom:8px;"></div>
+            <div class="shimmer-box" style="height:100px;"></div>
+          </div>
+          <div id="quiz-content" style="display:none;"></div>
+          <div id="quiz-submit-row" style="display:none;margin-top:13px;">
+            <button class="btn btn-teal" onclick="submitQuiz()" disabled>Submit Quiz</button>
+          </div>
+          <div id="quiz-score" style="display:none;"></div>
+        </div>
+
+        <!-- TUTOR PANEL -->
+        <div id="tutor-panel" class="std-panel">
+          <div class="page-title">AI Tutor</div>
+          <p class="page-sub">24/7 NMC competency-based Microbiology tutoring</p>
+          <div class="chat-wrap">
+            <div class="chat-msgs" id="chat-messages"></div>
+            <div class="chat-suggs">
+              <button class="chat-sugg" onclick="setChatInput('Explain MI1.2 Gram staining step by step')">MI1.2 Gram staining</button>
+              <button class="chat-sugg" onclick="setChatInput('What NMC competencies cover MI3 GI infections?')">MI3 GI competencies</button>
+              <button class="chat-sugg" onclick="setChatInput('Give a DOAP scenario for MI5.1 meningitis')">MI5.1 Meningitis DOAP</button>
+              <button class="chat-sugg" onclick="setChatInput('Explain MI8.7 infection control and PPE')">MI8.7 Infection control</button>
+            </div>
+            <div class="chat-input-row">
+              <input id="chat-input" class="inp" style="flex:1;" placeholder="Ask about NMC Microbiology... (Enter to send)" onkeydown="if(event.key==='Enter')sendChat()"/>
+              <button class="btn btn-teal" onclick="sendChat()">Send</button>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /student-content -->
+    </div><!-- /student-page -->
+
+    <!-- ══════════ DASHBOARD PAGE ══════════ -->
+    <div id="dashboard-page" class="page-scroll">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+        <div>
+          <div class="page-title">Class Dashboard</div>
+          <p class="page-sub">MBBS · Microbiology · NMC Competency Overview · Live Data</p>
+        </div>
+        <div class="live-badge" id="live-date-badge">● LIVE</div>
+      </div>
+
+      <div class="kpi-grid" id="dash-kpis">
+        <!-- Populated dynamically -->
+        <div class="kpi-card" style="background:var(--teal-l);border-color:var(--teal-b);border-top-color:var(--teal);"><div class="kpi-inner"><div><div class="kpi-lbl">REGISTERED STUDENTS</div><div class="kpi-val" id="kpi-students" style="color:var(--teal);">—</div><div class="kpi-sub">Active learners</div></div><span style="font-size:24px;">👥</span></div></div>
+        <div class="kpi-card" style="background:var(--teal-l);border-color:var(--teal-b);border-top-color:var(--teal);"><div class="kpi-inner"><div><div class="kpi-lbl">AVG SDL READINESS</div><div class="kpi-val" id="kpi-sdl" style="color:var(--teal);">—</div><div class="kpi-sub">Class average</div></div><span style="font-size:24px;">📈</span></div></div>
+        <div class="kpi-card" style="background:var(--amber-l);border-color:var(--amber-b);border-top-color:var(--amber);"><div class="kpi-inner"><div><div class="kpi-lbl">TOTAL REFLECTIONS</div><div class="kpi-val" id="kpi-reflections" style="color:var(--amber);">—</div><div class="kpi-sub">Submitted</div></div><span style="font-size:24px;">📝</span></div></div>
+        <div class="kpi-card" style="background:var(--violet-l);border-color:var(--violet-b);border-top-color:var(--violet);"><div class="kpi-inner"><div><div class="kpi-lbl">QUIZ ATTEMPTS</div><div class="kpi-val" id="kpi-quizzes" style="color:var(--violet);">—</div><div class="kpi-sub">Completed</div></div><span style="font-size:24px;">❓</span></div></div>
+      </div>
+
+      <div class="chart-grid-2">
+        <div class="card"><div class="card-hd">DOMAIN DISTRIBUTION (LIVE)</div><canvas id="domainChart" height="160"></canvas></div>
+        <div class="card"><div class="card-hd">MILLER'S PYRAMID LEVELS</div><canvas id="pyramidChart" height="160"></canvas></div>
+      </div>
+      <div class="chart-grid-eq">
+        <div class="card"><div class="card-hd">SDL READINESS BY STUDENT</div><canvas id="sdlBarChart" height="140"></canvas></div>
+        <div class="card"><div class="card-hd">TOP PERFORMERS</div><div id="top-performers"><div class="empty-state" style="padding:20px;"><div class="icon" style="font-size:24px;">📊</div><p style="font-size:12px;">Data appears after students complete quizzes</p></div></div></div>
+      </div>
+      <div class="card">
+        <div class="card-hd">RECENT ACTIVITY FEED</div>
+        <div class="activity-grid" id="activity-feed">
+          <div class="activity-item"><span style="font-size:15px;">📭</span><div><div class="activity-txt">No activity yet — students will appear here after login</div><div class="activity-time">Waiting for data</div></div></div>
+        </div>
+      </div>
+    </div><!-- /dashboard-page -->
+
+    <!-- ══════════ ADMIN PAGE ══════════ -->
+    <div id="admin-page" class="page-scroll">
+      <div class="page-title">Admin Panel</div>
+      <p class="page-sub">Faculty & coordinator view · Microbiology · Student management · Google Drive backend</p>
+
+      <div class="sub-nav">
+        <button class="sub-tab active" onclick="showAdminTab('students',this)">👥 Student Records</button>
+        <button class="sub-tab" onclick="showAdminTab('atrisk',this)">⚠️ At-Risk</button>
+        <button class="sub-tab" onclick="showAdminTab('insights',this)">🧠 Class Insights</button>
+        <button class="sub-tab" onclick="showAdminTab('gdrive',this)">☁️ Google Drive Setup</button>
+        <button class="sub-tab" onclick="showAdminTab('settings',this)">⚙️ Settings</button>
+      </div>
+
+      <!-- STUDENTS TAB -->
+      <div id="admin-students">
+        <div style="display:flex;gap:9px;margin-bottom:14px;flex-wrap:wrap;align-items:center;">
+          <input id="student-search" class="inp" style="flex:1;min-width:160px;" placeholder="Search student name or roll no..." oninput="renderStudentTable()"/>
+          <select id="filter-domain" class="inp" style="width:140px;" onchange="renderStudentTable()">
+            <option value="all">All Domains</option>
+            <option value="knowledge">Knowledge</option>
+            <option value="skill">Skill</option>
+            <option value="attitude">Attitude</option>
+          </select>
+          <select id="sort-by" class="inp" style="width:140px;" onchange="renderStudentTable()">
+            <option value="name">Sort: Name</option>
+            <option value="sdl">Sort: SDL %</option>
+            <option value="quiz">Sort: Quiz Avg</option>
+            <option value="date">Sort: Join Date</option>
+          </select>
+          <button class="btn btn-outline btn-sm" onclick="exportToCSV()">⬇ Export CSV</button>
+        </div>
+        <div class="tbl-wrap">
+          <div class="tbl-hd"><span>STUDENT</span><span>BATCH</span><span>DOMAIN</span><span>LEVEL</span><span>SDL %</span><span>ACTION</span></div>
+          <div id="student-table-body">
+            <div style="padding:30px;text-align:center;color:var(--slate5);font-size:13px;">No students registered yet. Data appears after students log in.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AT-RISK TAB -->
+      <div id="admin-atrisk" style="display:none;">
+        <div style="padding:14px 18px;background:var(--amber-l);border:1px solid var(--amber-b);border-radius:var(--r);margin-bottom:16px;display:flex;gap:12px;align-items:center;">
+          <span style="font-size:26px;">⚠️</span>
+          <div>
+            <div style="font-size:14px;color:#92400E;font-weight:700;margin-bottom:2px;">At-Risk Students (SDL &lt; 50%)</div>
+            <div style="font-size:12px;color:#B45309;">These students may need targeted faculty intervention</div>
+          </div>
+        </div>
+        <div class="at-risk-grid" id="at-risk-cards">
+          <div style="grid-column:1/-1;padding:30px;text-align:center;color:var(--slate5);font-size:13px;">No at-risk students identified yet.</div>
+        </div>
+      </div>
+
+      <!-- INSIGHTS TAB -->
+      <div id="admin-insights" style="display:none;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;">
+          <div class="card"><div class="card-hd">EMOTIONAL TONE DISTRIBUTION</div><div id="emotion-grid" style="display:flex;flex-wrap:wrap;gap:7px;padding-top:4px;"><div style="font-size:12px;color:var(--slate5);">Appears after students submit reflections</div></div></div>
+          <div class="card"><div class="card-hd">COMPETENCY GAP HEATMAP</div><div id="gap-heatmap"><div style="font-size:12px;color:var(--slate5);">Appears after analysis submissions</div></div></div>
+        </div>
+        <div class="card" style="border-color:var(--violet-b);">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:11px;">
+            <div style="font-size:12px;color:var(--violet);font-family:'DM Mono',monospace;font-weight:700;">🧠 AI CLASS INSIGHT (NMC-ALIGNED)</div>
+            <button class="btn btn-violet btn-sm" onclick="generateClassInsight()">Generate Insight</button>
+          </div>
+          <div id="insight-loading" style="display:none;" class="shimmer-box" style="height:80px;padding:30px;"></div>
+          <div id="insight-result" style="font-size:13px;color:var(--slate2);line-height:1.8;font-style:italic;"><span style="color:var(--slate5);">Click "Generate Insight" for AI-powered class-level NMC analysis</span></div>
+        </div>
+      </div>
+
+      <!-- GOOGLE DRIVE SETUP TAB -->
+      <div id="admin-gdrive" style="display:none;">
+        <div class="gdrive-banner">
+          <div class="gdrive-icon">☁️</div>
+          <div>
+            <div style="font-size:15px;font-weight:700;color:#92400E;margin-bottom:2px;">Google Drive / Sheets Backend Setup</div>
+            <div style="font-size:12px;color:#B45309;">Connect a Google Sheet to store all student registrations, quiz results, reflections and roadmaps automatically.</div>
+          </div>
+          <div class="gdrive-actions">
+            <button class="btn btn-amber btn-sm" onclick="testGDriveConnection()">Test Connection</button>
+            <button class="btn btn-teal btn-sm" onclick="saveGDriveConfig()">Save Config</button>
+          </div>
+        </div>
+
+        <div style="margin-bottom:18px;">
+          <div class="section-title">Step 1 — Create Google Apps Script Web App</div>
+          <div class="config-step"><div class="step-num">1</div><div class="step-content"><div class="step-title">Open Google Apps Script</div><div class="step-desc">Go to <a href="https://script.google.com" target="_blank" style="color:var(--teal);">script.google.com</a>, create a new project and paste the Apps Script code below.</div></div></div>
+          <div class="config-step"><div class="step-num">2</div><div class="step-content"><div class="step-title">Paste this Apps Script code</div><div class="step-code">// NMC CompetencyAI — Google Apps Script Backend
+// Paste this in Google Apps Script > Code.gs
+
+const SHEET_ID = 'YOUR_GOOGLE_SHEET_ID_HERE';
+
+function doPost(e) {
+  try {
+    const data = JSON.parse(e.postData.contents);
+    const ss = SpreadsheetApp.openById(SHEET_ID);
+    const sheetName = data.type || 'Registrations';
+    let sheet = ss.getSheetByName(sheetName);
+    if (!sheet) {
+      sheet = ss.insertSheet(sheetName);
+      // Add headers based on type
+      if (sheetName === 'Registrations') {
+        sheet.appendRow(['Timestamp','StudentID','Name','Roll','Batch','Email','Gender','Level']);
+      } else if (sheetName === 'QuizResults') {
+        sheet.appendRow(['Timestamp','StudentID','Name','Roll','Level','Score','Total','Pct','WrongCodes']);
+      } else if (sheetName === 'Reflections') {
+        sheet.appendRow(['Timestamp','StudentID','Name','Roll','ReflectionText','SDLReadiness','PrimaryDomain','Level','Quality','Gaps','Strengths']);
+      } else if (sheetName === 'Roadmaps') {
+        sheet.appendRow(['Timestamp','StudentID','Name','Roll','Level','RoadmapJSON']);
+      }
+    }
+    sheet.appendRow(data.row);
+    return ContentService.createTextOutput(JSON.stringify({status:'ok'}))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService.createTextOutput(JSON.stringify({status:'error',message:err.toString()}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function doGet(e) {
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  const sheetName = e.parameter.sheet || 'Registrations';
+  const sheet = ss.getSheetByName(sheetName);
+  if (!sheet) return ContentService.createTextOutput(JSON.stringify({rows:[]})).setMimeType(ContentService.MimeType.JSON);
+  const data = sheet.getDataRange().getValues();
+  const headers = data[0];
+  const rows = data.slice(1).map(r => {
+    const obj = {};
+    headers.forEach((h,i) => obj[h] = r[i]);
+    return obj;
+  });
+  return ContentService.createTextOutput(JSON.stringify({rows}))
+    .setMimeType(ContentService.MimeType.JSON);
+}</div></div></div>
+          <div class="config-step"><div class="step-num">3</div><div class="step-content"><div class="step-title">Deploy as Web App</div><div class="step-desc">In Apps Script: Deploy → New deployment → Web App → Execute as: Me → Who has access: Anyone → Deploy. Copy the Web App URL.</div></div></div>
+          <div class="config-step"><div class="step-num">4</div><div class="step-content"><div class="step-title">Create Google Sheet</div><div class="step-desc">Create a new Google Sheet, copy its ID from the URL (the long string between /d/ and /edit), and paste it in the script above where it says YOUR_GOOGLE_SHEET_ID_HERE.</div></div></div>
+        </div>
+
+        <div style="margin-bottom:18px;">
+          <div class="section-title">Step 2 — Enter Web App URL</div>
+          <div class="inp-group">
+            <label class="inp-label">Google Apps Script Web App URL</label>
+            <input id="gdrive-url" class="inp" type="url" placeholder="https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec"/>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-teal" onclick="saveGDriveConfig()">💾 Save & Activate</button>
+            <button class="btn btn-outline" onclick="testGDriveConnection()">🔌 Test Connection</button>
+          </div>
+          <div id="gdrive-status" style="margin-top:10px;font-size:13px;color:var(--slate4);"></div>
+        </div>
+
+        <div>
+          <div class="section-title">Data Sheets Created Automatically</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:9px;">
+            <div class="card" style="text-align:center;padding:14px;">
+              <div style="font-size:22px;margin-bottom:5px;">👤</div>
+              <div style="font-size:12px;font-weight:700;color:var(--slate);">Registrations</div>
+              <div style="font-size:11px;color:var(--slate5);">Student profiles & details</div>
+            </div>
+            <div class="card" style="text-align:center;padding:14px;">
+              <div style="font-size:22px;margin-bottom:5px;">❓</div>
+              <div style="font-size:12px;font-weight:700;color:var(--slate);">QuizResults</div>
+              <div style="font-size:11px;color:var(--slate5);">NMC MCQ scores & codes</div>
+            </div>
+            <div class="card" style="text-align:center;padding:14px;">
+              <div style="font-size:22px;margin-bottom:5px;">📝</div>
+              <div style="font-size:12px;font-weight:700;color:var(--slate);">Reflections</div>
+              <div style="font-size:11px;color:var(--slate5);">Analysis & SDL scores</div>
+            </div>
+            <div class="card" style="text-align:center;padding:14px;">
+              <div style="font-size:22px;margin-bottom:5px;">🗺️</div>
+              <div style="font-size:12px;font-weight:700;color:var(--slate);">Roadmaps</div>
+              <div style="font-size:11px;color:var(--slate5);">Generated learning plans</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS TAB -->
+      <div id="admin-settings" style="display:none;max-width:560px;">
+        <div class="settings-group">
+          <div class="settings-group-lbl">COMPETENCY FRAMEWORK</div>
+          <div class="settings-list">
+            <div class="settings-row"><span class="settings-key">Assessment model</span><span class="settings-val">NMC CBE 2018 + Miller's Pyramid</span></div>
+            <div class="settings-row"><span class="settings-key">Subject scope</span><span class="settings-val">Microbiology (MI1–MI8)</span></div>
+            <div class="settings-row"><span class="settings-key">Domain weights (K:S:A)</span><span class="settings-val">40% : 35% : 25%</span></div>
+            <div class="settings-row"><span class="settings-key">At-risk SDL threshold</span><span class="settings-val">&lt; 50%</span></div>
+          </div>
+        </div>
+        <div class="settings-group">
+          <div class="settings-group-lbl">AI CONFIGURATION</div>
+          <div class="settings-list">
+            <div class="settings-row"><span class="settings-key">Model</span><span class="settings-val">Claude Sonnet 4</span></div>
+            <div class="settings-row"><span class="settings-key">Competency-mapped quizzes</span><span class="settings-val">Enabled</span></div>
+            <div class="settings-row"><span class="settings-key">NMC code analysis</span><span class="settings-val">Enabled</span></div>
+            <div class="settings-row"><span class="settings-key">Auto-roadmap on quiz submit</span><span class="settings-val">Enabled</span></div>
+          </div>
+        </div>
+        <div class="settings-group">
+          <div class="settings-group-lbl">DATA STORAGE</div>
+          <div class="settings-list">
+            <div class="settings-row"><span class="settings-key">Backend</span><span class="settings-val" id="settings-backend">Google Drive (not configured)</span></div>
+            <div class="settings-row"><span class="settings-key">Local cache</span><span class="settings-val">Session Storage</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /admin-page -->
+  </div><!-- /main -->
+</div><!-- /app-shell -->
+
+<!-- STUDENT DETAIL MODAL -->
+<div class="modal-ov" id="student-modal" onclick="closeModal()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;">
+      <div><h3 id="modal-name" style="font-size:18px;font-weight:800;color:var(--slate);margin-bottom:3px;"></h3><div id="modal-roll" style="font-size:11px;color:var(--slate5);font-family:'DM Mono',monospace;"></div></div>
+      <button onclick="closeModal()" style="background:none;border:none;font-size:22px;color:var(--slate5);cursor:pointer;line-height:1;">×</button>
+    </div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// NMC MI COMPETENCY FRAMEWORK
+// ═══════════════════════════════════════════════════
+const NMC_MI_COMPETENCIES = `
+NMC COMPETENCY-BASED CURRICULUM — MICROBIOLOGY (MI) COMPETENCY CODES:
+
+GENERAL MICROBIOLOGY & IMMUNITY (MI1):
+MI1.1 KH - Describe causative agents of infectious diseases, detection methods, role of microbes in health/disease
+MI1.2 P  - Perform & identify agents by Gram stain, ZN stain, stool routine microscopy (DOAP)
+MI1.3 KH - Describe epidemiological basis of common infectious diseases
+MI1.4 KH - Classify & describe sterilization and disinfection methods; application in lab/clinical/surgical practice
+MI1.5 KH - Choose appropriate sterilization/disinfection method for specific situations
+MI1.6 K  - Describe mechanisms of drug resistance; antimicrobial susceptibility testing & monitoring
+MI1.7 KH - Describe immunological mechanisms in health
+MI1.8 KH - Describe immunity mechanisms and host immune response to infections
+MI1.9 KH - Discuss immunological basis of vaccines; Universal Immunisation schedule
+MI1.10 KH - Describe immunological mechanisms in hypersensitivity, autoimmune disorders, immunodeficiency
+MI1.11 KH - Describe immunological mechanisms of transplantation and tumour immunity
+
+CVS & BLOOD (MI2):
+MI2.1 KH - Describe etiologic agents of rheumatic fever and diagnosis
+MI2.2 KH - Describe infective endocarditis classification, etio-pathogenesis, clinical features
+MI2.3 SH - Identify microbial agents causing Rheumatic Heart Disease & infective endocarditis (DOAP)
+MI2.4 KH - List microbial agents causing anaemia; morphology, mode of infection, pathogenesis, treatment
+MI2.5 KH - Describe etio-pathogenesis of kalaazar, malaria, filariasis and other common parasites
+MI2.6 SH - Identify causative agent of malaria and filariasis (DOAP)
+MI2.7 KH - Describe epidemiology, etio-pathogenesis, diagnosis, prevention and management of HIV
+
+GASTROINTESTINAL & HEPATOBILIARY (MI3):
+MI3.1 KH - Enumerate microbial agents causing diarrhea/dysentery; epidemiology, morphology, pathogenesis
+MI3.2 SH - Identify common etiologic agents of diarrhea and dysentery (DOAP)
+MI3.3 KH - Describe enteric fever pathogens and laboratory diagnosis
+MI3.4 KH - Identify diagnostic modalities for enteric fever; choose appropriate test (DOAP)
+MI3.5 KH - Enumerate causative agents of food poisoning; pathogenesis, clinical course
+MI3.6 KH - Describe etio-pathogenesis of APD; diagnosis and management of H. pylori
+MI3.7 KH - Describe epidemiology, etio-pathogenesis, viral markers of Viral hepatitis
+MI3.8 KH - Choose appropriate laboratory test in diagnosis of viral hepatitis
+
+MUSCULOSKELETAL, SKIN & SOFT TISSUE (MI4):
+MI4.1 KH - Enumerate microbial agents causing anaerobic infections; etiopathogenesis, diagnosis
+MI4.2 KH - Describe etiopathogenesis of bone & joint infections
+MI4.3 KH - Describe etio-pathogenesis of skin and soft tissue infections
+
+CNS INFECTIONS (MI5):
+MI5.1 KH - Describe etiopathogenesis, clinical course and laboratory diagnosis of meningitis
+MI5.2 KH - Describe etiopathogenesis, clinical course and laboratory diagnosis of encephalitis
+MI5.3 SH - Identify microbial agents causing meningitis (DOAP)
+
+RESPIRATORY TRACT INFECTIONS (MI6):
+MI6.1 KH - Describe etio-pathogenesis, laboratory diagnosis and prevention of RTI
+MI6.2 P  - Identify common etiologic agents of URTI (Gram Stain) (DOAP)
+MI6.3 P  - Identify common etiologic agents of LRTI (Gram Stain & Acid fast stain) (DOAP)
+
+GENITOURINARY & STIs (MI7):
+MI7.1 KH - Describe etio-pathogenesis and laboratory diagnosis of genitourinary infections
+MI7.2 KH - Describe etio-pathogenesis and laboratory diagnosis of STIs; preventive measures
+MI7.3 KH - Describe etio-pathogenesis, clinical features, specimen collection of UTI
+
+ZOONOTIC DISEASES & MISCELLANEOUS (MI8):
+MI8.1 KH - Enumerate microbial agents and vectors causing zoonotic diseases; transmission, pathogenesis
+MI8.2 KH - Describe etio-pathogenesis of opportunistic infections (OI); factors, laboratory diagnosis
+MI8.3 KH - Describe role of oncogenic viruses in virus-associated malignancy
+MI8.4 KH - Describe etiologic agents of emerging infectious diseases; clinical course and diagnosis
+MI8.5 KH - Define Healthcare Associated Infections (HAI); types; factors; prevention methods
+MI8.6 KH - Describe basics of infection control
+MI8.7 P  - Demonstrate infection control practices and use of PPE (DOAP)
+MI8.8 KH - Describe methods for assessing microbial contamination of food, water and air
+MI8.9 KH - Discuss appropriate method of sample collection for laboratory tests
+MI8.10 SH - Demonstrate appropriate method of sample collection (DOAP)
+MI8.11 SH - Demonstrate respect for patient samples (DOAP - Attitude)
+MI8.12 KH - Discuss confidentiality pertaining to patient identity in laboratory results (Attitude)
+MI8.13 KH - Choose appropriate laboratory test in diagnosis of infectious disease
+MI8.14 SH - Demonstrate confidentiality pertaining to patient identity (DOAP - Attitude)
+MI8.15 SH - Choose and interpret results of laboratory tests in diagnosis
+MI8.16 K  - Describe National Health Programs in prevention of common infectious disease
+
+DOMAINS: K=Knowledge, S=Skill, A=Attitude | LEVELS: K=Knows, KH=Knows How, SH=Shows How, P=Performs
+`;
+
+// ═══════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════
+let currentStudent = null;   // logged-in student object
+let currentRole    = null;   // 'student' | 'faculty' | 'admin'
+let currentUser    = null;   // generic user object (works for all roles)
+let selectedRole   = null;   // role chosen on login screen
+
+// ── Hardcoded credentials (replace with GDrive lookup in production) ──
+const FACULTY_CREDENTIALS = [
+  {id:'FAC001', password:'faculty123', name:'Dr. Anita Sharma',   dept:'Microbiology'},
+  {id:'FAC002', password:'faculty456', name:'Dr. Rajesh Kumar',   dept:'Pathology'},
+];
+const ADMIN_CREDENTIALS = [
+  {username:'admin',    password:'admin@nmc2024'},
+  {username:'nmcadmin', password:'microbio@2024'},
+];
+
+let gDriveUrl = '';          // Google Apps Script Web App URL
+let STUDENTS = [];           // live data from Drive or session
+let analysisData = null;
+let quizQuestions = [];
+let quizAnswers = {};
+let quizSubmitted = false;
+let chatHistory = [];
+let dashChartInstances = {};
+
+// Colour helpers
+const domainColor  = d=>({knowledge:'#0D9488',skill:'#D97706',attitude:'#7C3AED'}[d]||'#94A3B8');
+const levelColor   = l=>({Knows:'#94A3B8','Knows How':'#D97706','Shows How':'#0D9488',Performs:'#059669'}[l]||'#94A3B8');
+const emotionColor = e=>({confident:'#0D9488',motivated:'#059669',anxious:'#D97706',frustrated:'#DC2626',confused:'#7C3AED'}[e]||'#94A3B8');
+const emotionEmoji = e=>({confident:'😊',motivated:'💪',anxious:'😰',frustrated:'😤',confused:'😕'}[e]||'');
+const sdlColor     = v=>v>=70?'#0D9488':v>=50?'#D97706':'#DC2626';
+
+// ═══════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════
+function showToast(msg, type='info'){
+  const t=document.getElementById('toast');
+  const d=document.createElement('div');
+  d.className=`toast-item toast-${type}`;
+  d.innerHTML=(type==='success'?'✓':type==='error'?'✕':'ℹ')+' '+msg;
+  t.appendChild(d);
+  setTimeout(()=>{d.style.opacity='0';d.style.transition='opacity .3s';setTimeout(()=>d.remove(),350);},3500);
+}
+
+// ═══════════════════════════════════════════════════
+// GOOGLE DRIVE / APPS SCRIPT INTEGRATION
+// ═══════════════════════════════════════════════════
+function loadGDriveConfig(){
+  const saved = sessionStorage.getItem('nmc_gdrive_url');
+  if(saved){ gDriveUrl=saved; updateSyncStatus(true); }
+}
+function saveGDriveConfig(){
+  const url = document.getElementById('gdrive-url').value.trim();
+  if(!url){ showToast('Please enter a valid Web App URL','error'); return; }
+  gDriveUrl = url;
+  sessionStorage.setItem('nmc_gdrive_url', url);
+  document.getElementById('settings-backend').textContent = 'Google Drive (configured ✓)';
+  showToast('Google Drive URL saved!','success');
+  updateSyncStatus(true);
+}
+async function testGDriveConnection(){
+  const url = document.getElementById('gdrive-url').value.trim() || gDriveUrl;
+  if(!url){ showToast('Please enter your Web App URL first','error'); return; }
+  const statusEl = document.getElementById('gdrive-status');
+  statusEl.textContent = 'Testing connection...';
+  try{
+    const res = await fetch(url+'?sheet=Registrations');
+    if(res.ok){ statusEl.style.color=var_teal; statusEl.textContent='✓ Connection successful! Google Sheet is reachable.'; showToast('Connection successful!','success'); }
+    else { statusEl.style.color='#DC2626'; statusEl.textContent='✗ Connection failed (HTTP '+res.status+')'; }
+  }catch(e){ statusEl.style.color='#DC2626'; statusEl.textContent='✗ Connection failed. Check CORS settings in Apps Script (execute as: Me, access: Anyone).'; }
+}
+const var_teal='#0D9488';
+function updateSyncStatus(configured){
+  const el=document.getElementById('sync-status');
+  if(!el) return;
+  el.textContent = configured ? '● Drive Connected' : '● Not synced';
+  el.style.color = configured ? var_teal : '#94A3B8';
+}
+async function sendToGDrive(type, row){
+  if(!gDriveUrl) return;
+  try{
+    await fetch(gDriveUrl, {
+      method:'POST',
+      body: JSON.stringify({type, row}),
+      headers:{'Content-Type':'application/json'}
+    });
+    updateSyncStatus(true);
+  }catch(e){ console.warn('GDrive sync failed:', e.message); }
+}
+async function loadFromGDrive(sheet){
+  if(!gDriveUrl) return [];
+  try{
+    const res = await fetch(gDriveUrl+'?sheet='+sheet);
+    const data = await res.json();
+    return data.rows || [];
+  }catch(e){ return []; }
+}
+
+// ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
+// ROLE SELECTOR
+// ═══════════════════════════════════════════════════
+function selectRole(role){
+  selectedRole = role;
+  ['student','faculty','admin'].forEach(r=>{
+    document.getElementById('role-card-'+r).classList.toggle('selected', r===role);
+  });
+  document.getElementById('login-screen').className = 'role-'+role;
+  const titles  = {student:'Student Registration', faculty:'Faculty Login', admin:'Admin Login'};
+  const subs    = {student:'Enter your details to begin your SDL journey', faculty:'Access class dashboard and student analytics', admin:'Full platform control and configuration'};
+  const badges  = {student:'⚕ NMC CBE 2018 · MBBS Microbiology', faculty:'👨‍🏫 Faculty · Dashboard & Analytics', admin:'🛡️ Admin · Full Platform Access'};
+  const labels  = {student:'Begin SDL Journey →', faculty:'Access Dashboard →', admin:'Enter Admin Panel →'};
+  document.getElementById('login-title').textContent    = titles[role];
+  document.getElementById('login-subtitle').textContent = subs[role];
+  document.getElementById('login-badge').textContent    = badges[role];
+  document.getElementById('login-btn-txt').textContent  = labels[role];
+  ['student','faculty','admin'].forEach(r=>{
+    document.getElementById('form-'+r).style.display = r===role?'block':'none';
+  });
+  document.getElementById('login-btn').style.display    = 'block';
+  document.getElementById('back-btn').style.display     = 'block';
+  document.getElementById('login-footer').style.display = 'none';
+  document.getElementById('login-err').style.display    = 'none';
+}
+function resetRoleSelector(){
+  selectedRole = null;
+  ['student','faculty','admin'].forEach(r=>document.getElementById('role-card-'+r).classList.remove('selected'));
+  document.getElementById('login-screen').className = '';
+  document.getElementById('login-title').textContent    = 'Welcome';
+  document.getElementById('login-subtitle').textContent = 'Select your role to continue';
+  document.getElementById('login-badge').textContent    = '⚕ NMC CBE 2018 · MBBS Microbiology';
+  ['student','faculty','admin'].forEach(r=>document.getElementById('form-'+r).style.display='none');
+  document.getElementById('login-btn').style.display    = 'none';
+  document.getElementById('back-btn').style.display     = 'none';
+  document.getElementById('login-footer').style.display = 'block';
+  document.getElementById('login-err').style.display    = 'none';
+}
+
+// ═══════════════════════════════════════════════════
+// LOGIN — role-aware
+// ═══════════════════════════════════════════════════
+function loadingDots(label){
+  return `<span class="loader-dots"><span class="loader-dot"></span><span class="loader-dot"></span><span class="loader-dot"></span></span> ${label}...`;
+}
+
+async function handleLogin(){
+  if(!selectedRole){ showToast('Please select a role first','error'); return; }
+  const errEl  = document.getElementById('login-err');
+  const btn    = document.getElementById('login-btn');
+  const btnTxt = document.getElementById('login-btn-txt');
+  errEl.style.display = 'none';
+
+  if(selectedRole === 'student'){
+    const sid    = document.getElementById('f-sid').value.trim();
+    const roll   = document.getElementById('f-roll').value.trim();
+    const name   = document.getElementById('f-name').value.trim();
+    const batch  = document.getElementById('f-batch').value;
+    const level  = document.getElementById('f-level').value;
+    const email  = document.getElementById('f-email').value.trim();
+    const gender = document.querySelector('input[name="gender"]:checked')?.value||'';
+    if(!sid||!roll||!name||!batch||!level||!email||!gender){
+      errEl.style.display='block'; errEl.textContent='Please fill in all required fields.'; return;
+    }
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+      errEl.style.display='block'; errEl.textContent='Please enter a valid email address.'; return;
+    }
+    btn.disabled=true; btnTxt.innerHTML=loadingDots('Registering');
+    currentStudent = {sid,roll,name,batch,level,email,gender,
+      joinedAt:new Date().toISOString(),sdl:0,quizAttempts:0,reflections:0,quizAvg:0,domain:'knowledge',emotional:'motivated'};
+    currentRole = 'student';
+    currentUser = {...currentStudent, role:'student'};
+    sessionStorage.setItem('nmc_student', JSON.stringify(currentStudent));
+    sessionStorage.setItem('nmc_role', 'student');
+    loadGDriveConfig();
+    const ts = new Date().toLocaleString('en-IN');
+    await sendToGDrive('Registrations',[ts,sid,name,roll,batch,email,gender,level]);
+    if(!STUDENTS.find(s=>s.sid===sid)) STUDENTS.push({...currentStudent});
+    chatHistory=[{role:'assistant',content:`Hello ${name}! 👋 Welcome to NMC CompetencyAI.\n\nI'm your AI tutor for Microbiology, aligned to the NMC CBE 2018 framework. I can help with any MI competency (MI1–MI8), explain concepts at your "${level}" Miller's level, create mnemonics, and more.\n\nWhat would you like to explore today?`}];
+    renderChat();
+    launchApp('student', name, roll, name.charAt(0).toUpperCase());
+    showToast(`Welcome, ${name}! Ready to learn Microbiology 🔬`,'success');
+
+  } else if(selectedRole === 'faculty'){
+    const fid    = document.getElementById('f-fid').value.trim();
+    const fname  = document.getElementById('f-fname').value.trim();
+    const fdept  = document.getElementById('f-fdept').value;
+    const femail = document.getElementById('f-femail').value.trim();
+    const fpass  = document.getElementById('f-fpass').value;
+    if(!fid||!fname||!fdept||!femail||!fpass){
+      errEl.style.display='block'; errEl.textContent='Please fill in all required fields.'; return;
+    }
+    const match = FACULTY_CREDENTIALS.find(f=>f.id===fid && f.password===fpass);
+    const demoOk = fid.toUpperCase().startsWith('FAC') && fpass.length>=6;
+    if(!match && !demoOk){
+      errEl.style.display='block'; errEl.textContent='Invalid Faculty ID or password. Contact admin.'; return;
+    }
+    btn.disabled=true; btnTxt.innerHTML=loadingDots('Signing in');
+    currentRole = 'faculty';
+    currentUser = {id:fid, name:match?match.name:fname, dept:match?match.dept:fdept, email:femail, role:'faculty'};
+    sessionStorage.setItem('nmc_role','faculty');
+    sessionStorage.setItem('nmc_user',JSON.stringify(currentUser));
+    loadGDriveConfig();
+    await loadFromGDriveToAdmin();
+    launchApp('faculty', currentUser.name, fdept, currentUser.name.charAt(0).toUpperCase());
+    showToast(`Welcome, ${currentUser.name}! Faculty dashboard ready 📊`,'success');
+
+  } else if(selectedRole === 'admin'){
+    const auser = document.getElementById('f-auser').value.trim();
+    const apass = document.getElementById('f-apass').value;
+    if(!auser||!apass){ errEl.style.display='block'; errEl.textContent='Please enter username and password.'; return; }
+    const match = ADMIN_CREDENTIALS.find(a=>a.username===auser && a.password===apass);
+    if(!match){ errEl.style.display='block'; errEl.textContent='Invalid admin credentials.'; return; }
+    btn.disabled=true; btnTxt.innerHTML=loadingDots('Signing in');
+    currentRole = 'admin';
+    currentUser = {username:auser, name:'Administrator', role:'admin'};
+    sessionStorage.setItem('nmc_role','admin');
+    sessionStorage.setItem('nmc_user',JSON.stringify(currentUser));
+    loadGDriveConfig();
+    await loadFromGDriveToAdmin();
+    launchApp('admin','Administrator', auser, '🛡');
+    showToast('Admin panel unlocked 🛡️','success');
+  }
+
+  btn.disabled=false;
+}
+
+function launchApp(role, displayName, subLabel, avatarChar){
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-shell').classList.add('visible');
+  document.getElementById('nav-student-name').textContent = displayName;
+  document.getElementById('nav-student-roll').textContent = subLabel;
+  document.getElementById('nav-avatar').textContent       = avatarChar;
+  const rb = document.getElementById('nav-role-badge');
+  rb.style.display = 'inline-flex';
+  rb.textContent   = {student:'🎓 Student', faculty:'👨‍🏫 Faculty', admin:'🛡️ Admin'}[role];
+  rb.className     = 'nav-role-badge '+{student:'nav-role-student',faculty:'nav-role-faculty',admin:'nav-role-admin'}[role];
+  buildNavTabs(role);
+  if(role==='student'){
+    const lvlSel=document.getElementById('level-select');
+    if(currentStudent && lvlSel){ for(let o of lvlSel.options){ if(o.value===currentStudent.level){o.selected=true;break;} } }
+    showPage('student');
+  } else {
+    showPage('dashboard');
+  }
+}
+
+function buildNavTabs(role){
+  const tabDefs = {
+    student: [{id:'student', label:'🎓 My SDL'}],
+    faculty: [{id:'dashboard', label:'📊 Dashboard'}, {id:'admin', label:'👥 Student Records'}],
+    admin:   [{id:'dashboard', label:'📊 Dashboard'}, {id:'admin', label:'🛡️ Admin Panel'}, {id:'student', label:'🎓 SDL Preview'}]
+  };
+  const tabs = tabDefs[role] || tabDefs.student;
+  document.getElementById('nav-tabs').innerHTML = tabs.map((t,i)=>
+    `<button class="nav-tab${i===0?' active':''}" data-page="${t.id}" onclick="showPage('${t.id}')">${t.label}</button>`
+  ).join('');
+}
+
+function handleLogout(){
+  if(!confirm('Are you sure you want to logout?')) return;
+  sessionStorage.removeItem('nmc_student');
+  sessionStorage.removeItem('nmc_role');
+  sessionStorage.removeItem('nmc_user');
+  currentStudent=null; currentRole=null; currentUser=null; selectedRole=null;
+  STUDENTS=[]; analysisData=null; chatHistory=[];
+  quizQuestions=[]; quizAnswers={}; quizSubmitted=false;
+  document.getElementById('app-shell').classList.remove('visible');
+  document.getElementById('login-screen').style.display='flex';
+  resetRoleSelector();
+  ['f-sid','f-roll','f-name','f-email'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  ['f-batch','f-level'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  document.querySelectorAll('input[name="gender"]').forEach(r=>r.checked=false);
+  ['f-fid','f-fname','f-femail','f-fpass','f-auser','f-apass'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  const fd=document.getElementById('f-fdept'); if(fd) fd.value='';
+}
+
+// ═══════════════════════════════════════════════════
+// PAGE NAVIGATION
+// ═══════════════════════════════════════════════════
+function showPage(id){
+  ['student','dashboard','admin'].forEach(p=>{
+    const el=document.getElementById(p+'-page');
+    if(!el) return;
+    if(p==='student'){
+      el.style.display = id===p?'flex':'none';
+      el.classList.toggle('visible', id===p);
+    } else {
+      el.classList.toggle('visible', p===id);
+    }
+  });
+  document.querySelectorAll('#nav-tabs .nav-tab').forEach(b=>{
+    b.classList.toggle('active', b.dataset.page===id);
+  });
+  if(id==='dashboard') initDashboard();
+  if(id==='admin') loadFromGDriveToAdmin();
+}
+function showAdminTab(id, btn){
+  ['students','atrisk','insights','gdrive','settings'].forEach(t=>{
+    const el=document.getElementById('admin-'+t);
+    if(el) el.style.display=t===id?'block':'none';
+  });
+  document.querySelectorAll('.sub-tab').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+}
+
+// ═══════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════
+loadGDriveConfig();
+const _savedRole = sessionStorage.getItem('nmc_role');
+if(_savedRole){
+  currentRole = _savedRole;
+  if(_savedRole==='student'){
+    const _s=sessionStorage.getItem('nmc_student');
+    if(_s){
+      currentStudent=JSON.parse(_s);
+      currentUser={...currentStudent,role:'student'};
+      chatHistory=[{role:'assistant',content:`Welcome back, ${currentStudent.name}! 👋 Ready to continue your NMC Microbiology journey?\n\nYou're working at "${currentStudent.level}" level. What would you like to explore today?`}];
+      renderChat();
+      launchApp('student', currentStudent.name, currentStudent.roll, currentStudent.name.charAt(0).toUpperCase());
+    }
+  } else {
+    const _u=sessionStorage.getItem('nmc_user');
+    if(_u){
+      currentUser=JSON.parse(_u);
+      launchApp(_savedRole, currentUser.name||'Administrator', currentUser.dept||currentUser.username||'', (currentUser.name||'A').charAt(0).toUpperCase());
+    }
+  }
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter' && document.getElementById('login-screen').style.display!=='none') handleLogin();
+});
+</script>
+</body>
+</html>
