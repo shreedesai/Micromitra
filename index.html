@@ -1238,25 +1238,40 @@ function launchApp(role, displayName, subLabel, avatarChar){
   rb.textContent   = {student:'🎓 Student', faculty:'👨‍🏫 Faculty', admin:'🛡️ Admin'}[role];
   rb.className     = 'nav-role-badge '+{student:'nav-role-student',faculty:'nav-role-faculty',admin:'nav-role-admin'}[role];
   buildNavTabs(role);
-  if(role==='student'){
-    const lvlSel=document.getElementById('level-select');
-    if(currentStudent && lvlSel){ for(let o of lvlSel.options){ if(o.value===currentStudent.level){o.selected=true;break;} } }
-    showPage('student');
-  } else {
-    showPage('dashboard');
+  const lvlSel=document.getElementById('level-select');
+  if(currentStudent && lvlSel){
+    for(let o of lvlSel.options){
+      if(o.value===currentStudent.level){o.selected=true;break;}
+    }
   }
+  showPage('student');
 }
 
 function buildNavTabs(role){
+
   const tabDefs = {
-    student: [{id:'student', label:'🎓 My SDL'}],
-    faculty: [{id:'dashboard', label:'📊 Dashboard'}, {id:'admin', label:'👥 Student Records'}],
-    admin:   [{id:'dashboard', label:'📊 Dashboard'}, {id:'admin', label:'🛡️ Admin Panel'}, {id:'student', label:'🎓 SDL Preview'}]
+    student: [
+      {id:'student', label:'🎓 Student SDL'}
+    ],
+
+    faculty: [
+      {id:'student', label:'🎓 Student SDL'},
+      {id:'dashboard', label:'📊 Dashboard'}
+    ],
+
+    admin: [
+      {id:'student', label:'🎓 Student SDL'},
+      {id:'dashboard', label:'📊 Dashboard'},
+      {id:'admin', label:'🛡 Admin Portal'}
+    ]
   };
+
   const tabs = tabDefs[role] || tabDefs.student;
-  document.getElementById('nav-tabs').innerHTML = tabs.map((t,i)=>
-    `<button class="nav-tab${i===0?' active':''}" data-page="${t.id}" onclick="showPage('${t.id}')">${t.label}</button>`
-  ).join('');
+
+  document.getElementById('nav-tabs').innerHTML =
+    tabs.map((t,i)=>
+      `<button class="nav-tab${i===0?' active':''}" data-page="${t.id}" onclick="showPage('${t.id}')">${t.label}</button>`
+    ).join('');
 }
 
 function handleLogout(){
