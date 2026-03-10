@@ -1351,6 +1351,42 @@ document.addEventListener('keydown',e=>{
 function loadFromDriveToAdmin(){
   console.log("Admin data loader initialized");
 }
+
+/* ===========================
+   Dashboard Initialization
+=========================== */
+
+function initDashboard(){
+
+  console.log("Dashboard initialized");
+
+  // Placeholder dashboard values
+  document.getElementById("total-students").innerText = 0;
+  document.getElementById("avg-sdl").innerText = "0%";
+  document.getElementById("risk-count").innerText = 0;
+  document.getElementById("total-reflections").innerText = 0;
+
+}
+
+/* ===========================
+   Admin Data Loader
+=========================== */
+
+function loadFromDriveToAdmin(){
+
+  console.log("Admin data loader initialized");
+
+  const table = document.getElementById("student-table-body");
+
+  if(!table) return;
+
+  table.innerHTML = `
+    <div style="padding:30px;text-align:center;color:#64748B;font-size:13px;">
+      No student data yet. Data will appear when students register.
+    </div>
+  `;
+
+}
   
 </script>
 </body>
