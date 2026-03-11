@@ -1244,7 +1244,15 @@ function launchApp(role, displayName, subLabel, avatarChar){
       if(o.value===currentStudent.level){o.selected=true;break;}
     }
   }
-  showPage('student');
+  if(role === "admin"){
+  showPage("admin");
+}
+else if(role === "faculty"){
+  showPage("dashboard");
+}
+else{
+  showPage("student");
+}
 }
 
 function buildNavTabs(role){
