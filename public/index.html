@@ -5,14 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MICROMITRA v7 — NMC CBE Microbiology AI Tutor</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@sb/sb-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   // ── Supabase project credentials ──
   // Safe to expose publicly: this is the anon/public key, access is controlled by
-  // Row Level Security policies on the database (see sb/schema.sql).
+  // Row Level Security policies on the database (see supabase/schema.sql).
   const SUPABASE_URL = 'https://bjjvesqkrfnzwcxtgugz.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_CtJItuUsfkwb9GYkWYs_iQ_Tqy8GZyT';
-  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  let sb;
+  if (window.supabase && window.supabase.createClient) {
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  } else {
+    console.error('Supabase library failed to load from CDN.');
+    window.addEventListener('DOMContentLoaded', () => {
+      document.body.insertAdjacentHTML('afterbegin',
+        '<div style="background:#d94f4f;color:#fff;padding:10px 16px;text-align:center;font-size:13px">' +
+        'Could not load a required library (Supabase). Please check your internet connection and reload the page.' +
+        '</div>');
+    });
+  }
 </script>
 <style>
 :root{
@@ -4273,7 +4284,7 @@ const CDash = {
 };
 
 // Pulls every student's profile + stats from Supabase (RLS only allows this for
-// a logged-in faculty account — see sb/schema.sql) and reshapes it into
+// a logged-in faculty account — see supabase/schema.sql) and reshapes it into
 // the {name, roll, subject, domain, level, sdl, quiz} rows the dashboard/admin UI expects.
 async function loadClassDashData() {
   try {
