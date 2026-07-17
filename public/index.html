@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MICROMITRA v7 — NMC CBE Microbiology AI Tutor</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@sb/sb-js@2"></script>
 <script>
   // ── Supabase project credentials ──
   // Safe to expose publicly: this is the anon/public key, access is controlled by
-  // Row Level Security policies on the database (see supabase/schema.sql).
-  const SUPABASE_URL = 'https://bjjvesqkrfnzwcxtgugz.supabase.co';       // e.g. https://xxxx.supabase.co
+  // Row Level Security policies on the database (see sb/schema.sql).
+  const SUPABASE_URL = 'https://bjjvesqkrfnzwcxtgugz.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_CtJItuUsfkwb9GYkWYs_iQ_Tqy8GZyT';
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 </script>
 <style>
 :root{
@@ -2095,7 +2095,7 @@ async function startApp(role) {
   try {
     if (authMode === 'login') {
       // ── LOG IN ──
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
       if (error) throw error;
       await loadStudentFromStorage(); // pulls profile+stats and boots the UI
       return;
@@ -2131,7 +2131,7 @@ async function startApp(role) {
       };
     }
 
-    const { data: signUpData, error: signUpErr } = await supabase.auth.signUp({ email, password });
+    const { data: signUpData, error: signUpErr } = await sb.auth.signUp({ email, password });
     if (signUpErr) throw signUpErr;
 
     // If email confirmation is required, there is no session yet.
@@ -2144,9 +2144,9 @@ async function startApp(role) {
 
     const userId = signUpData.user.id;
     student = { ...student, ...profileFields, id: userId, email };
-    const { error: profileErr } = await supabase.from('profiles').upsert({ id: userId, email, ...profileFields });
+    const { error: profileErr } = await sb.from('profiles').upsert({ id: userId, email, ...profileFields });
     if (profileErr) throw profileErr;
-    const { error: statsErr } = await supabase.from('stats').upsert({ id: userId });
+    const { error: statsErr } = await sb.from('stats').upsert({ id: userId });
     if (statsErr) throw statsErr;
 
     document.getElementById('onboard-modal').classList.add('hidden');
@@ -2187,18 +2187,18 @@ function statsRowToState(row) {
 
 async function loadStudentFromStorage() {
   try {
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { session } } = await sb.auth.getSession();
     if (!session) return; // no logged-in user — show the onboarding modal as-is
 
     const userId = session.user.id;
-    const { data: profile, error: pErr } = await supabase.from('profiles').select('*').eq('id', userId).single();
+    const { data: profile, error: pErr } = await sb.from('profiles').select('*').eq('id', userId).single();
     if (pErr || !profile) { showAuthError('Could not load your profile. Please try logging in again.'); return; }
 
     student = { id: profile.id, email: profile.email, name: profile.name, roll: profile.roll, year: profile.year,
                 college: profile.college, dept: profile.dept, goal: profile.goal, role: profile.role };
     currentRole = student.role || 'student';
 
-    const { data: statsRow } = await supabase.from('stats').select('*').eq('id', userId).single();
+    const { data: statsRow } = await sb.from('stats').select('*').eq('id', userId).single();
     statsRowToState(statsRow);
 
     document.getElementById('onboard-modal').classList.add('hidden');
@@ -2216,7 +2216,7 @@ async function loadStudentFromStorage() {
 }
 
 async function logOut() {
-  await supabase.auth.signOut();
+  await sb.auth.signOut();
   location.reload();
 }
 
@@ -2789,7 +2789,7 @@ function disableSendBtns(v) {
 async function saveStats() {
   try {
     if (!student.id) return; // not logged in
-    await supabase.from('stats').upsert({
+    await sb.from('stats').upsert({
       id: student.id,
       interactions: stats.interactions, gaps_found: stats.gapsFound,
       k: stats.K, s: stats.S, a: stats.A, com: stats.Com,
@@ -4273,16 +4273,16 @@ const CDash = {
 };
 
 // Pulls every student's profile + stats from Supabase (RLS only allows this for
-// a logged-in faculty account — see supabase/schema.sql) and reshapes it into
+// a logged-in faculty account — see sb/schema.sql) and reshapes it into
 // the {name, roll, subject, domain, level, sdl, quiz} rows the dashboard/admin UI expects.
 async function loadClassDashData() {
   try {
-    const { data: profiles, error: pErr } = await supabase.from('profiles').select('*').eq('role', 'student');
+    const { data: profiles, error: pErr } = await sb.from('profiles').select('*').eq('role', 'student');
     if (pErr) throw pErr;
     const ids = (profiles || []).map(p => p.id);
     let statsById = {};
     if (ids.length) {
-      const { data: statsRows, error: sErr } = await supabase.from('stats').select('*').in('id', ids);
+      const { data: statsRows, error: sErr } = await sb.from('stats').select('*').in('id', ids);
       if (sErr) throw sErr;
       statsById = Object.fromEntries((statsRows || []).map(r => [r.id, r]));
     }
