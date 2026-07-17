@@ -2770,7 +2770,20 @@ async function doSend() {
       })
     });
     const data = await res.json();
+    if (data.error) {
+      removeEl(loadId);
+      const msg = typeof data.error === 'string' ? data.error : (data.error.message || JSON.stringify(data.error));
+      appendError('AI error: ' + msg);
+      disableSendBtns(false);
+      return;
+    }
     const raw = (data.content||[]).map(c=>c.text||'').join('');
+    if (!raw) {
+      removeEl(loadId);
+      appendError('The AI returned an empty response. Check the server logs on Render for details.');
+      disableSendBtns(false);
+      return;
+    }
     history.push({ role:'assistant', content: raw });
     removeEl(loadId);
     let parsed;
